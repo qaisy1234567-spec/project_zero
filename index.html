@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>PROJECT ZERO</title>
+<style>
+  :root {
+    --bg: #050810;
+    --panel: #0a1220;
+    --panel2: #0f1a2e;
+    --border: #1a3556;
+    --cyan: #22d3ee;
+    --cyan-dim: #0891b2;
+    --cyan-glow: rgba(34,211,238,0.4);
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --warn: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Courier New', Consolas, monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 12px;
+    background-image:
+      radial-gradient(circle at 50% 0%, rgba(34,211,238,0.08), transparent 60%),
+      linear-gradient(rgba(26,53,86,0.12) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(26,53,86,0.12) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+    background-attachment: fixed;
+  }
+  .app {
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+    background: linear-gradient(180deg, var(--panel), var(--panel2));
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 16px;
+    box-shadow: 0 0 60px rgba(34,211,238,0.08);
+    position: relative;
+    overflow: hidden;
+  }
+  .app::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0.7;
+  }
+
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .top-bar .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--success);
+    display: inline-block;
+    margin-right: 6px;
+    box-shadow: 0 0 8px var(--success);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* Progress steps */
+  .steps { display: flex; gap: 5px; margin-bottom: 18px; }
+  .step {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    transition: 0.3s;
+  }
+  .step.active { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+  .step.done { background: var(--success); }
+
+  .header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .phase-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    border: 1px solid var(--cyan-dim);
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    text-shadow: 0 0 20px var(--cyan-glow);
+    margin-bottom: 6px;
+    word-break: break-word;
+  }
+  h2 {
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    font-weight: normal;
+  }
+
+  .content { line-height: 1.6; font-size: 0.9rem; }
+  .muted { color: var(--muted); font-size: 0.85rem; }
+
+  /* Forms */
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: var(--cyan);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .field input {
+    width: 100%;
+    background: #050810;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 1rem;
+    outline: none;
+    transition: 0.2s;
+  }
+  .field input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px var(--cyan-glow);
+  }
+
+  button {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: 0.2s;
+    text-transform: uppercase;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #0891b2, #22d3ee);
+    color: #050810;
+  }
+  .btn-primary:hover, .btn-primary:active {
+    filter: brightness(1.15);
+    box-shadow: 0 0 25px var(--cyan-glow);
+  }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    margin-top: 8px;
+    font-size: 0.75rem;
+    padding: 10px;
+  }
+
+  /* Alerts */
+  .alert {
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin: 12px 0;
+    font-size: 0.85rem;
+    border: 1px solid;
+    line-height: 1.5;
+  }
+  .alert-error {
+    background: rgba(239,68,68,0.08);
+    border-color: rgba(239,68,68,0.3);
+    color: #fca5a5;
+  }
+  .alert-success {
+    background: rgba(34,197,94,0.08);
+    border-color: rgba(34,197,94,0.3);
+    color: #86efac;
+  }
+  .alert-info {
+    background: rgba(34,211,238,0.06);
+    border-color: rgba(34,211,238,0.25);
+    color: #a5f3fc;
+  }
+
+  /* Equation block */
+  .eq-counter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: var(--cyan);
+    text-transform: uppercase;
+  }
+  .eq-counter .progress-dots { display: flex; gap: 5px; }
+  .eq-counter .pdot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .eq-counter .pdot.done { background: var(--success); }
+  .eq-counter .pdot.active { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+
+  .eq-block {
+    background: #050810;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--cyan);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    overflow-x: auto;
+    font-size: 0.95rem;
+  }
+  .eq-label {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .eq-body {
+    color: var(--text);
+    line-height: 1.8;
+    font-size: 0.9rem;
+    word-break: break-word;
+  }
+  .eq-body sup { font-size: 0.7em; vertical-align: super; }
+  .eq-body sub { font-size: 0.7em; vertical-align: sub; }
+
+  /* Letter grid */
+  .grid-title {
+    margin-top: 22px;
+    margin-bottom: 8px;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .letters-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+  }
+  .letter-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #050810;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: var(--cyan);
+    cursor: pointer;
+    transition: 0.15s;
+    user-select: none;
+  }
+  .letter-cell:active {
+    background: #0f1a2e;
+    border-color: var(--cyan);
+    transform: scale(0.95);
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5,8,16,0.9);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+    animation: fadeIn 0.2s;
+  }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  .modal {
+    background: linear-gradient(180deg, var(--panel), var(--panel2));
+    border: 1px solid var(--cyan-dim);
+    border-radius: 14px;
+    padding: 20px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 0 60px var(--cyan-glow);
+    position: relative;
+    animation: slideUp 0.25s;
+  }
+  @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .modal-close {
+    position: absolute;
+    top: 10px; right: 12px;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 1.5rem;
+    width: auto;
+    padding: 4px 10px;
+    cursor: pointer;
+    letter-spacing: 0;
+  }
+  .modal-close:hover { color: var(--cyan); }
+  .modal-letter {
+    text-align: center;
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: var(--cyan);
+    text-shadow: 0 0 30px var(--cyan-glow);
+    margin-bottom: 16px;
+  }
+  .modal-letter-sub {
+    text-align: center;
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-top: -14px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+  .coord-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .coord-box {
+    background: #050810;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+  .coord-label {
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .coord-value {
+    font-size: 1.1rem;
+    color: var(--cyan);
+    font-weight: bold;
+  }
+  .circle-viz {
+    display: flex;
+    justify-content: center;
+    margin: 12px 0;
+  }
+  .circle-viz svg { width: 140px; height: 140px; }
+
+  /* Word reveal */
+  .word-reveal {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: 20px 0;
+  }
+  .word-reveal .letter {
+    width: 46px; height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #050810;
+    border: 1px solid var(--cyan);
+    border-radius: 8px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--cyan);
+    text-shadow: 0 0 12px var(--cyan-glow);
+    animation: glowIn 0.5s backwards;
+  }
+  .word-reveal .letter:nth-child(1) { animation-delay: 0.1s; }
+  .word-reveal .letter:nth-child(2) { animation-delay: 0.3s; }
+  .word-reveal .letter:nth-child(3) { animation-delay: 0.5s; }
+  .word-reveal .letter:nth-child(4) { animation-delay: 0.7s; }
+  @keyframes glowIn {
+    from { opacity: 0; transform: scale(0.6); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* Cipher */
+  .cipher-block {
+    background: #050810;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    margin: 14px 0;
+    font-family: monospace;
+    font-size: 0.8rem;
+    line-height: 1.9;
+    color: #a5f3fc;
+    overflow-x: auto;
+    word-break: break-all;
+  }
+
+  .footer {
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 480px) {
+    .app { padding: 16px 12px; }
+    h1 { font-size: 1.2rem; letter-spacing: 2px; }
+    .letters-grid { grid-template-columns: repeat(6, 1fr); gap: 4px; }
+    .letter-cell { font-size: 0.8rem; border-radius: 5px; }
+    .word-reveal .letter { width: 38px; height: 48px; font-size: 1.2rem; }
+    .modal-letter { font-size: 2.8rem; }
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="top-bar">
+      <span><span class="dot"></span>PROJECT ZERO</span>
+      <span id="session-info">UNREGISTERED</span>
+    </div>
+
+    <div class="steps">
+      <div class="step active" id="step-0"></div>
+      <div class="step" id="step-1"></div>
+      <div class="step" id="step-2"></div>
+      <div class="step" id="step-3"></div>
+      <div class="step" id="step-4"></div>
+    </div>
+
+    <!-- ═══════════ SCREEN 1: INTRO ═══════════ -->
+    <div id="screen-intro" class="screen">
+      <div class="header">
+        <div class="phase-tag">Locked Sequence</div>
+        <h1>PROJECT ZERO</h1>
+        <h2>FIVE PHASES · ONE FINAL SENTENCE</h2>
+      </div>
+      <div class="content">
+        <p class="muted" style="margin-bottom:14px;">
+          An interactive sequence of progressive puzzles driven by analysis,
+          deduction, and logical reasoning. Five locked phases. Each one resolves
+          into a single key word and unlocks the next.
+        </p>
+        <div class="alert alert-info">
+          Register to begin your journey. Your progress will be recorded.
+        </div>
+        <div class="field">
+          <label>Full Name</label>
+          <input type="text" id="input-name" placeholder="Enter your full name" autocomplete="name">
+        </div>
+        <div class="field">
+          <label>Phone Number</label>
+          <input type="tel" id="input-phone" placeholder="07XXXXXXXX" autocomplete="tel">
+        </div>
+        <div id="intro-error" class="alert alert-error hidden"></div>
+        <button class="btn-primary" id="btn-start">Begin Phase 01</button>
+      </div>
+      <div class="footer">Designed &amp; Owned by ENG.QAYS</div>
+    </div>
+
+    <!-- ═══════════ SCREEN 2: PHASE 1 ═══════════ -->
+    <div id="screen-phase1" class="screen hidden">
+      <div class="header">
+        <div class="phase-tag">Phase 01 · Scientific</div>
+        <h1>COORDINATE TRACE</h1>
+        <h2>FOUR LOCKED SYSTEMS</h2>
+      </div>
+
+      <div class="content">
+        <p class="muted" style="margin-bottom:14px;">
+          Four locked systems. Each one resolves into a single triple (x, y, r).
+          Solve them in order. Each correct answer reveals one letter of the path.
+        </p>
+
+        <!-- Equation counter -->
+        <div class="eq-counter">
+          <span>Equation <span id="eq-num">1</span> / 4</span>
+          <div class="progress-dots">
+            <div class="pdot active" id="pdot-0"></div>
+            <div class="pdot" id="pdot-1"></div>
+            <div class="pdot" id="pdot-2"></div>
+            <div class="pdot" id="pdot-3"></div>
+          </div>
+        </div>
+
+        <!-- Current equation -->
+        <div class="eq-block">
+          <div class="eq-label">Equation <span id="eq-label-num">01</span></div>
+          <div class="eq-body" id="eq-body">Loading...</div>
+        </div>
+
+        <!-- Solved equations strip -->
+        <div id="solved-strip" class="hidden" style="margin-top:12px;">
+          <div class="grid-title">Solved</div>
+          <div class="word-reveal" id="solved-word" style="gap:6px;margin:8px 0;"></div>
+        </div>
+
+        <!-- Answer input -->
+        <div class="field" style="margin-top:16px;">
+          <label>Enter the letter</label>
+          <input type="text" id="input-p1" placeholder="A single letter" maxlength="1" autocomplete="off" autocapitalize="characters" style="text-align:center;font-size:1.4rem;letter-spacing:6px;text-transform:uppercase;">
+        </div>
+
+        <div id="p1-feedback" class="alert hidden"></div>
+        <button class="btn-primary" id="btn-p1">Verify</button>
+
+        <!-- Letters grid -->
+        <div class="grid-title">Alphabet traces · Tap any letter to inspect</div>
+        <div class="letters-grid" id="letters-grid"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════ SCREEN 3: PHASE 1 COMPLETE ═══════════ -->
+    <div id="screen-p1-done" class="screen hidden">
+      <div class="header">
+        <div class="phase-tag" style="color:var(--success);border-color:var(--success);">Phase 01 · Complete</div>
+        <h1 style="color:var(--success);text-shadow:0 0 20px rgba(34,197,94,0.5);">WORD RECOVERED</h1>
+        <h2>THE PATH IS PROVEN</h2>
+      </div>
+      <div class="content" style="text-align:center;">
+        <p class="muted">Read it forward — the key word:</p>
+        <div class="word-reveal" id="final-word-reveal"></div>
+
+        <div class="alert alert-info" style="text-align:left;margin-top:20px;">
+          <strong>Read it backward — the gate opens.</strong><br>
+          The password for Phase 02 is <strong id="pw-shown" style="color:var(--cyan);letter-spacing:2px;">····</strong>
+        </div>
+
+        <button class="btn-primary" id="btn-to-p2" style="margin-top:14px;">Enter Phase 02</button>
+      </div>
+    </div>
+
+    <!-- ═══════════ SCREEN 4: PHASE 2 ═══════════ -->
+    <div id="screen-phase2" class="screen hidden">
+      <div class="header">
+        <div class="phase-tag">Phase 02 · Cipher</div>
+        <h1>THE ENCODED TRACE</h1>
+        <h2>NUMERIC SEQUENCE</h2>
+      </div>
+      <div class="content">
+        <div class="alert alert-info">
+          The password for the next file is the name of the person who owns the object — spelled backwards.
+        </div>
+        <div class="cipher-block" id="cipher-text"></div>
+        <div class="field" style="margin-top:18px;">
+          <label>Enter the decoded name</label>
+          <input type="text" id="input-p2" placeholder="Type the name" autocomplete="off" autocapitalize="off" style="text-align:center;font-size:1.1rem;letter-spacing:2px;">
+        </div>
+        <div id="p2-feedback" class="alert hidden"></div>
+        <button class="btn-primary" id="btn-p2">Verify</button>
+        <button class="btn-ghost" id="btn-back-p2">← Back</button>
+      </div>
+    </div>
+
+    <!-- ═══════════ SCREEN 5: DONE ═══════════ -->
+    <div id="screen-done" class="screen hidden">
+      <div class="header">
+        <div class="phase-tag" style="color:var(--success);border-color:var(--success);">Phase 02 · Complete</div>
+        <h1 style="color:var(--success);text-shadow:0 0 20px rgba(34,197,94,0.5);">LOCK OPENED</h1>
+        <h2>THE SEQUENCE CONTINUES</h2>
+      </div>
+      <div class="content" style="text-align:center;">
+        <div class="alert alert-success" style="text-align:left;">
+          Your progress has been recorded. The next phase will continue in the full version.
+        </div>
+        <div class="alert alert-info" style="text-align:left;">
+          To be added to the group, send your name to ENG.QAYS on WhatsApp.
+        </div>
+      </div>
+      <div class="footer">PROJECT ZERO · SESSION COMPLETE</div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════ MODAL ═══════════ -->
+  <div id="modal-overlay" class="modal-overlay hidden" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <div class="modal-letter" id="modal-letter">A</div>
+      <div class="modal-letter-sub">Coordinate Trace</div>
+      <div class="coord-row">
+        <div class="coord-box">
+          <div class="coord-label">X</div>
+          <div class="coord-value" id="modal-x">0</div>
+        </div>
+        <div class="coord-box">
+          <div class="coord-label">Y</div>
+          <div class="coord-value" id="modal-y">0</div>
+        </div>
+        <div class="coord-box">
+          <div class="coord-label">R</div>
+          <div class="coord-value" id="modal-r">0</div>
+        </div>
+      </div>
+      <div class="circle-viz">
+        <svg viewBox="-60 -60 120 120" id="modal-svg">
+          <circle cx="0" cy="0" r="50" fill="none" stroke="#1a3556" stroke-width="0.5" stroke-dasharray="2,3"/>
+          <line x1="-55" y1="0" x2="55" y2="0" stroke="#1a3556" stroke-width="0.5" stroke-dasharray="2,3"/>
+          <line x1="0" y1="-55" x2="0" y2="55" stroke="#1a3556" stroke-width="0.5" stroke-dasharray="2,3"/>
+          <circle id="modal-circle" cx="0" cy="0" r="20" fill="none" stroke="#22d3ee" stroke-width="1.5" opacity="0.7"/>
+          <line id="modal-line" x1="0" y1="0" x2="0" y2="0" stroke="#22d3ee" stroke-width="1.5"/>
+          <circle id="modal-center" cx="0" cy="0" r="2.5" fill="#a5f3fc"/>
+          <circle id="modal-dot" cx="0" cy="0" r="3.5" fill="#22d3ee"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   CONFIGURATION — EDIT ONLY THIS SECTION
+   ═══════════════════════════════════════════════════════════ */
+const CONFIG = {
+
+  // Correct letter for each equation (in order)
+  equationAnswers: ['T', 'R', 'O', 'Y'],
+
+  // Key word recovered after Phase 1 (read forward)
+  keyWordForward: 'TROY',
+
+  // Password for Phase 2 (keyWordForward reversed, lowercase)
+  phase2Password: 'yort',
+
+  // Correct answer for Phase 2
+  phase2Answer: 'FILL_IN_LATER',
+
+  // Equations to display (HTML allowed)
+  equations: [
+    '(x + y + 1)<sup>2</sup> + (y − x + 9)<sup>2</sup> = 18',
+    '((x−3)·√(10+2√5) + (y+6)·(√5−1))<sup>2</sup><br>+ (−(x−3)(√5−1) + (y+6)·√(10+2√5))<sup>2</sup> = 256',
+    'x<sup>2</sup> + y<sup>2</sup> − 4x + 14y + 44 = 0',
+    '((x−6)·cos(π/7) + (y+3)·sin(π/7))<sup>2</sup><br>+ (−(x−6)·sin(π/7) + (y+3)·cos(π/7))<sup>2</sup> = 16'
+  ],
+
+  // All 26 letters with their coordinates (x, y, r)
+  // Letters not in this list will show as "unknown trace"
+  letterData: {
+    'A': { x:  3, y:  -4, r:  5 },
+    'C': { x: 15, y: -20, r: 25 },
+    'E': { x: 10, y: -24, r: 26 },
+    'G': { x: 12, y: -30, r: 37 },
+    'J': { x: 21, y:  28, r: 35 },
+    'L': { x: 15, y:  36, r: 39 },
+    'N': { x: 14, y:  48, r: 50 },
+    'O': { x:  2, y:  -7, r:  3 },
+    'P': { x:  9, y: -40, r: 41 },
+    'Q': { x: 28, y:  45, r: 53 },
+    'R': { x:  3, y:  -6, r:  4 },
+    'T': { x:  4, y:  -5, r:  3 },
+    'V': { x: 20, y: -48, r: 52 },
+    'Y': { x:  6, y:  -7, r:  4 }
+  },
+
+  // Phase 2 cipher
+  cipher: '08-28-27-01-25 / 01-23-24-03-25-02-28 142-08-03 600. 068459 089-14-05 08-28-27-01-25 / 01-23-24-03-25-02-28 205-03-01 600 068459 312-11-07 08-28-27-01-25 / 01-23-24-03-25-02-28 054-19-02 600 068459 178-06-04 08-28-27-01-25 / 01-23-24-03-25-02-28 310-15-08 420Medjat1_11195 045-12-03 420Medjat1_11195 112-07-05 420Medjat1_11195 218-14-02'
+};
+/* ═══════════════════════════════════════════════════════════
+   END CONFIGURATION — DO NOT EDIT BELOW
+   ═══════════════════════════════════════════════════════════ */
+
+const state = {
+  player: null,
+  currentEq: 0,        // 0..3
+  solvedLetters: [],   // ['T','R','O']
+  phase1Done: false,
+  phase2Done: false
+};
+
+const $ = id => document.getElementById(id);
+const screens = {
+  intro:   $('screen-intro'),
+  p1:      $('screen-phase1'),
+  p1done:  $('screen-p1-done'),
+  p2:      $('screen-phase2'),
+  done:    $('screen-done')
+};
+
+function show(name) {
+  Object.values(screens).forEach(s => s.classList.add('hidden'));
+  screens[name].classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function setStep(n) {
+  for (let i = 0; i < 5; i++) {
+    const el = $('step-' + i);
+    el.classList.remove('active','done');
+    if (i < n) el.classList.add('done');
+    if (i === n) el.classList.add('active');
+  }
+}
+
+// ─── Letters grid ───
+const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+function buildLettersGrid() {
+  const g = $('letters-grid');
+  g.innerHTML = '';
+  ALPHABET.forEach(L => {
+    const d = document.createElement('div');
+    d.className = 'letter-cell';
+    d.textContent = L;
+    d.addEventListener('click', () => openModal(L));
+    g.appendChild(d);
+  });
+}
+
+// ─── Modal ───
+function openModal(letter) {
+  const data = CONFIG.letterData[letter];
+  $('modal-letter').textContent = letter;
+  if (!data) {
+    $('modal-x').textContent = '—';
+    $('modal-y').textContent = '—';
+    $('modal-r').textContent = '—';
+    $('modal-svg').style.opacity = '0.15';
+  } else {
+    $('modal-x').textContent = data.x;
+    $('modal-y').textContent = data.y;
+    $('modal-r').textContent = data.r;
+    $('modal-svg').style.opacity = '1';
+    drawCircle(data);
+  }
+  $('modal-overlay').classList.remove('hidden');
+}
+function closeModal() {
+  $('modal-overlay').classList.add('hidden');
+}
+function drawCircle(d) {
+  // Fit coords to viewBox -60..60
+  const maxAbs = Math.max(Math.abs(d.x), Math.abs(d.y), d.r) * 1.2 || 10;
+  const scale = 50 / maxAbs;
+  const cx = 0, cy = 0;
+  const px = d.x * scale;
+  const py = -d.y * scale; // SVG y is flipped
+  $('modal-circle').setAttribute('r', d.r * scale);
+  $('modal-circle').setAttribute('cx', cx);
+  $('modal-circle').setAttribute('cy', cy);
+  $('modal-dot').setAttribute('cx', px);
+  $('modal-dot').setAttribute('cy', py);
+  $('modal-line').setAttribute('x1', cx);
+  $('modal-line').setAttribute('y1', cy);
+  $('modal-line').setAttribute('x
